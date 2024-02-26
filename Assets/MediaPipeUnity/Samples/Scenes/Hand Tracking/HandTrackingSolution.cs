@@ -4,7 +4,6 @@
 // license that can be found in the LICENSE file or at
 // https://opensource.org/licenses/MIT.
 
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -17,6 +16,8 @@ namespace Mediapipe.Unity.Sample.HandTracking
     [SerializeField] private NormalizedRectListAnnotationController _handRectsFromPalmDetectionsAnnotationController;
     [SerializeField] private MultiHandLandmarkListAnnotationController _handLandmarksAnnotationController;
     [SerializeField] private NormalizedRectListAnnotationController _handRectsFromLandmarksAnnotationController;
+
+    public bool isExpanded = false;
 
     public HandTrackingGraph.ModelComplexity modelComplexity
     {
@@ -42,24 +43,22 @@ namespace Mediapipe.Unity.Sample.HandTracking
       set => graphRunner.minTrackingConfidence = value;
     }
 
-    protected override void OnStartRun()
-    {
-      if (!runningMode.IsSynchronous())
-      {
-        graphRunner.OnPalmDetectectionsOutput += OnPalmDetectionsOutput;
-        graphRunner.OnHandRectsFromPalmDetectionsOutput += OnHandRectsFromPalmDetectionsOutput;
-        graphRunner.OnHandLandmarksOutput += OnHandLandmarksOutput;
-        // TODO: render HandWorldLandmarks annotations
-        graphRunner.OnHandRectsFromLandmarksOutput += OnHandRectsFromLandmarksOutput;
-        graphRunner.OnHandednessOutput += OnHandednessOutput;
-      }
+protected override void OnStartRun()
+{
+    graphRunner.OnPalmDetectectionsOutput += OnPalmDetectionsOutput;
+    graphRunner.OnHandRectsFromPalmDetectionsOutput += OnHandRectsFromPalmDetectionsOutput;
+    graphRunner.OnHandLandmarksOutput += OnHandLandmarksOutput;
+    // TODO: render HandWorldLandmarks annotations
+    graphRunner.OnHandRectsFromLandmarksOutput += OnHandRectsFromLandmarksOutput;
+    graphRunner.OnHandednessOutput += OnHandednessOutput;
 
-      var imageSource = ImageSourceProvider.ImageSource;
-      SetupAnnotationController(_palmDetectionsAnnotationController, imageSource, true);
-      SetupAnnotationController(_handRectsFromPalmDetectionsAnnotationController, imageSource, true);
-      SetupAnnotationController(_handLandmarksAnnotationController, imageSource, true);
-      SetupAnnotationController(_handRectsFromLandmarksAnnotationController, imageSource, true);
-    }
+    var imageSource = ImageSourceProvider.ImageSource;
+    SetupAnnotationController(_palmDetectionsAnnotationController, imageSource, true);
+    SetupAnnotationController(_handRectsFromPalmDetectionsAnnotationController, imageSource, true);
+    SetupAnnotationController(_handLandmarksAnnotationController, imageSource, true);
+    SetupAnnotationController(_handRectsFromLandmarksAnnotationController, imageSource, true);
+}
+
 
     protected override void AddTextureFrameToInputStream(TextureFrame textureFrame)
     {
@@ -104,47 +103,29 @@ namespace Mediapipe.Unity.Sample.HandTracking
             for (int i = 0; i < value[0].Landmark.Count; i++)
             {
                 var landmark = value[0].Landmark[i];
-                Debug.Log($"Landmark {i}: ({landmark.X}, {landmark.Y}, {landmark.Z})");
+                // Debug.Log($"Landmark {i}: ({landmark.X}, {landmark.Y}, {landmark.Z})");
             }
 
-            // Check the state of each finger
-            bool isHandContracted = true;
+            // Check the distances between specific landmarks to determine finger expansion
+            Vector3 indexTipPosition = new Vector3(value[0].Landmark[8].X, value[0].Landmark[8].Y, value[0].Landmark[8].Z);
+            Vector3 middleTipPosition = new Vector3(value[0].Landmark[12].X, value[0].Landmark[12].Y, value[0].Landmark[12].Z);
+            Vector3 ringTipPosition = new Vector3(value[0].Landmark[16].X, value[0].Landmark[16].Y, value[0].Landmark[16].Z);
+            Vector3 littleTipPosition = new Vector3(value[0].Landmark[20].X, value[0].Landmark[20].Y, value[0].Landmark[20].Z);
 
-            for (int i = 1; i <= 16; i += 4) // Start from THUMB_CMC (1) and check every 4th joint until the tip of the ring finger
+            float indexMiddleDistance = Vector3.Distance(indexTipPosition, middleTipPosition);
+            float middleRingDistance = Vector3.Distance(middleTipPosition, ringTipPosition);
+            float ringLittleDistance = Vector3.Distance(ringTipPosition, littleTipPosition);
+
+            // Set isExpanded to true if there is clear space between fingers, otherwise set it to false
+            if (indexMiddleDistance > 0.05f && middleRingDistance > 0.05f && ringLittleDistance > 0.05f)
             {
-                Vector3 fingerTipPosition = new Vector3(value[0].Landmark[i + 3].X, value[0].Landmark[i + 3].Y, value[0].Landmark[i + 3].Z);
-                Vector3 nextFingerTipPosition = new Vector3(value[0].Landmark[i + 7].X, value[0].Landmark[i + 7].Y, value[0].Landmark[i + 7].Z);
-
-                float fingerDistance = Vector3.Distance(fingerTipPosition, nextFingerTipPosition);
-
-                // Log the finger distance for debugging
-                Debug.Log($"Finger {i / 4 + 1} Distance: {fingerDistance}");
-
-                if (fingerDistance > 0.05f)
-                {
-                    Debug.Log($"Finger {i / 4 + 1} is expanded!");
-                    isHandContracted = false;
-                }
-                else
-                {
-                    Debug.Log($"Finger {i / 4 + 1} is contracted!");
-                }
+                isExpanded = true;
+                Debug.Log("Fingers are expanded");
             }
-
-            try
+            else
             {
-                if (isHandContracted)
-                {
-                    Debug.Log("Hand is contracted!");
-                }
-                else
-                {
-                    Debug.Log("Hand is expanded!");
-                }
-            }
-            catch (Exception e)
-            {
-                Debug.LogError($"Error in OnHandLandmarksOutput: {e}");
+                isExpanded = false;
+                Debug.Log("Fingers are contracted");
             }
         }
 
