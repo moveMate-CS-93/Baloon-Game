@@ -4,6 +4,7 @@
 // license that can be found in the LICENSE file or at
 // https://opensource.org/licenses/MIT.
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -94,9 +95,60 @@ namespace Mediapipe.Unity.Sample.HandTracking
 
     private void OnHandLandmarksOutput(object stream, OutputStream<List<NormalizedLandmarkList>>.OutputEventArgs eventArgs)
     {
-      var packet = eventArgs.packet;
-      var value = packet == null ? default : packet.Get(NormalizedLandmarkList.Parser);
-      _handLandmarksAnnotationController.DrawLater(value);
+        var packet = eventArgs.packet;
+        var value = packet == null ? default : packet.Get(NormalizedLandmarkList.Parser);
+
+        if (value != null && value.Count > 0 && value[0].Landmark.Count >= 21)
+        {
+            // Log the landmarks for debugging
+            for (int i = 0; i < value[0].Landmark.Count; i++)
+            {
+                var landmark = value[0].Landmark[i];
+                Debug.Log($"Landmark {i}: ({landmark.X}, {landmark.Y}, {landmark.Z})");
+            }
+
+            // Check the state of each finger
+            bool isHandContracted = true;
+
+            for (int i = 1; i <= 16; i += 4) // Start from THUMB_CMC (1) and check every 4th joint until the tip of the ring finger
+            {
+                Vector3 fingerTipPosition = new Vector3(value[0].Landmark[i + 3].X, value[0].Landmark[i + 3].Y, value[0].Landmark[i + 3].Z);
+                Vector3 nextFingerTipPosition = new Vector3(value[0].Landmark[i + 7].X, value[0].Landmark[i + 7].Y, value[0].Landmark[i + 7].Z);
+
+                float fingerDistance = Vector3.Distance(fingerTipPosition, nextFingerTipPosition);
+
+                // Log the finger distance for debugging
+                Debug.Log($"Finger {i / 4 + 1} Distance: {fingerDistance}");
+
+                if (fingerDistance > 0.05f)
+                {
+                    Debug.Log($"Finger {i / 4 + 1} is expanded!");
+                    isHandContracted = false;
+                }
+                else
+                {
+                    Debug.Log($"Finger {i / 4 + 1} is contracted!");
+                }
+            }
+
+            try
+            {
+                if (isHandContracted)
+                {
+                    Debug.Log("Hand is contracted!");
+                }
+                else
+                {
+                    Debug.Log("Hand is expanded!");
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Error in OnHandLandmarksOutput: {e}");
+            }
+        }
+
+        _handLandmarksAnnotationController.DrawLater(value);
     }
 
     private void OnHandRectsFromLandmarksOutput(object stream, OutputStream<List<NormalizedRect>>.OutputEventArgs eventArgs)
