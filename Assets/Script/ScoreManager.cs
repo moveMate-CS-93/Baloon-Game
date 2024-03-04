@@ -7,17 +7,17 @@ public class ScoreManager : MonoBehaviour
 {
     public Text scoreText;
     private float score;
-    private bool isGameOver = false;
 
     // Update is called once per frame
     void Update()
     {
-        if (!isGameOver)
+        if(GameObject.FindGameObjectsWithTag("Player") != null)
         {
             score += 1 * Time.deltaTime;
             scoreText.text = ((int)score).ToString();
         }
     }
+<<<<<<< HEAD
 
     // Call this method when the game is over
     public void GameOver()
@@ -37,4 +37,6 @@ public class ScoreManager : MonoBehaviour
         scoreText.text = "0";
         isGameOver = false;
     }
+=======
+>>>>>>> parent of a5e1c6e (all done, game is working perfectly)
 }
