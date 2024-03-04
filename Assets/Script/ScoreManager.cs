@@ -23,7 +23,18 @@ public class ScoreManager : MonoBehaviour
     public void GameOver()
     {
         isGameOver = true;
-        // Implement any additional actions when the game is over
-        // For example, you can show a game over panel or perform other actions.
+
+        // Stop the timer
+        if (TimerManager.Instance != null)
+        {
+            TimerManager.Instance.StopTimer();
+        }
+    }
+    // Call this method to reset the score
+    public void ResetScore()
+    {
+        score = 0f;
+        scoreText.text = "0";
+        isGameOver = false;
     }
 }

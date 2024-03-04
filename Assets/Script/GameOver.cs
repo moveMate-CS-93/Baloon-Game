@@ -7,7 +7,8 @@ public class GameOver : MonoBehaviour
 {
     public GameObject gameOverPanel;
     public Camera mainCamera; // Reference to your main camera
-
+    private TimerManager timerManager;
+    private ScoreManager scoreManager;
     // Default camera size
     private float defaultCameraSize;
 
@@ -18,6 +19,11 @@ public class GameOver : MonoBehaviour
         {
             defaultCameraSize = mainCamera.orthographicSize;
         }
+        // Find the TimerManager
+        timerManager = FindObjectOfType<TimerManager>();
+
+        // Find the ScoreManager
+        scoreManager = FindObjectOfType<ScoreManager>();
     }
 
     void Update()
@@ -30,6 +36,18 @@ public class GameOver : MonoBehaviour
 
     public void Restart()
     {
+        Debug.Log("Restart Button Clicked");
+
+        // Hide the game over panel
+        if (gameOverPanel != null)
+        {
+            Debug.Log("Hiding Game Over Panel");
+            gameOverPanel.SetActive(false);
+
+            // Set gameOverPanel to null
+            gameOverPanel = null;
+        }
+
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
 
         // Reset camera size after restarting the scene
@@ -37,11 +55,24 @@ public class GameOver : MonoBehaviour
         {
             mainCamera.orthographicSize = defaultCameraSize;
         }
+        // Restart the timer
+        if (timerManager != null)
+        {
+            timerManager.RestartTimer();
+        }
+        // Reset the score
+        if (scoreManager != null)
+        {
+            scoreManager.ResetScore();
+        }
     }
 
     // Show game over panel and perform other actions
     private void GameOverAction()
     {
-        gameOverPanel.SetActive(true);
+        if (gameOverPanel != null)
+        {
+            gameOverPanel.SetActive(true);
+        }
     }
 }
