@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,17 +5,17 @@ public class ScoreManager : MonoBehaviour
 {
     public Text scoreText;
     private float score;
+    private bool isGameOver = false;
 
     // Update is called once per frame
     void Update()
     {
-        if(GameObject.FindGameObjectsWithTag("Player") != null)
+        if (!isGameOver)
         {
             score += 1 * Time.deltaTime;
             scoreText.text = ((int)score).ToString();
         }
     }
-<<<<<<< HEAD
 
     // Call this method when the game is over
     public void GameOver()
@@ -30,6 +28,7 @@ public class ScoreManager : MonoBehaviour
             TimerManager.Instance.StopTimer();
         }
     }
+
     // Call this method to reset the score
     public void ResetScore()
     {
@@ -37,6 +36,4 @@ public class ScoreManager : MonoBehaviour
         scoreText.text = "0";
         isGameOver = false;
     }
-=======
->>>>>>> parent of a5e1c6e (all done, game is working perfectly)
 }

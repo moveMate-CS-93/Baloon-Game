@@ -6,7 +6,6 @@ using UnityEngine.SceneManagement;
 public class GameOver : MonoBehaviour
 {
     public GameObject gameOverPanel;
-<<<<<<< HEAD
     public Camera mainCamera; // Reference to your main camera
     private TimerManager timerManager;
     private ScoreManager scoreManager;
@@ -26,34 +25,27 @@ public class GameOver : MonoBehaviour
         // Find the ScoreManager
         scoreManager = FindObjectOfType<ScoreManager>();
     }
-=======
->>>>>>> parent of a5e1c6e (all done, game is working perfectly)
 
     // Update is called once per frame
     void Update()
     {
-        if(GameObject.FindGameObjectsWithTag("Player") == null)
+        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+
+        if (players == null || players.Length == 0)
         {
-            gameOverPanel.SetActive(true);
+            GameOverAction();
         }
     }
+
 
     public void Restart()
     {
         Debug.Log("Restart Button Clicked");
 
         // Hide the game over panel
-        if (gameOverPanel != null)
-        {
-            Debug.Log("Hiding Game Over Panel");
-            gameOverPanel.SetActive(false);
-
-            // Set gameOverPanel to null
-            gameOverPanel = null;
-        }
-
+        gameOverPanel.SetActive(false);
+    
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-<<<<<<< HEAD
 
         // Reset camera size after restarting the scene
         if (mainCamera != null)
@@ -79,7 +71,5 @@ public class GameOver : MonoBehaviour
         {
             gameOverPanel.SetActive(true);
         }
-=======
->>>>>>> parent of a5e1c6e (all done, game is working perfectly)
     }
 }
