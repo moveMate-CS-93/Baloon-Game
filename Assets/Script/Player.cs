@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Mediapipe.Unity.Sample.HandTracking;
 using UnityEngine;
 
-public class Player : MonoBehaviour
+public class NewBehaviourScript : MonoBehaviour
 {
     public float playerSpeed;
     private Rigidbody2D rb;
