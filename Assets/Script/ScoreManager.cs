@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -21,24 +23,7 @@ public class ScoreManager : MonoBehaviour
     public void GameOver()
     {
         isGameOver = true;
-<<<<<<< HEAD
-
-        // Stop the timer
-        if (TimerManager.Instance != null)
-        {
-            TimerManager.Instance.StopTimer();
-        }
-    }
-
-    // Call this method to reset the score
-    public void ResetScore()
-    {
-        score = 0f;
-        scoreText.text = "0";
-        isGameOver = false;
-=======
         // Implement any additional actions when the game is over
         // For example, you can show a game over panel or perform other actions.
->>>>>>> parent of 57dcc73 (did the timer but now game over is not getting hidden)
     }
 }
