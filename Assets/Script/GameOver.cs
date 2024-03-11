@@ -11,6 +11,8 @@ public class GameOver : MonoBehaviour
     // Default camera size
     private float defaultCameraSize;
 
+    private TimerManager timerManager; // Reference to the TimerManager script
+
     void Start()
     {
         // Store the default camera size on Start
@@ -18,6 +20,9 @@ public class GameOver : MonoBehaviour
         {
             defaultCameraSize = mainCamera.orthographicSize;
         }
+
+        // Find and store the TimerManager instance
+        timerManager = TimerManager.Instance;
     }
 
     void Update()
@@ -37,11 +42,23 @@ public class GameOver : MonoBehaviour
         {
             mainCamera.orthographicSize = defaultCameraSize;
         }
+
+        // Restart the timer
+        if (timerManager != null)
+        {
+            timerManager.RestartTimer();
+        }
     }
 
     // Show game over panel and perform other actions
     private void GameOverAction()
     {
         gameOverPanel.SetActive(true);
+
+        // Stop the timer when the game over panel appears
+        if (timerManager != null)
+        {
+            timerManager.StopTimer();
+        }
     }
 }
